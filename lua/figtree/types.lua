@@ -1,0 +1,4 @@
+---@class opts
+---@field text string
+---@field font string
+---@field remaps function
