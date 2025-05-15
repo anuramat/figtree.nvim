@@ -1,5 +1,4 @@
 local M = {}
-local m = {}
 local state = {}
 
 local callbacks = require('figtree.callbacks')
