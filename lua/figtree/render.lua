@@ -4,9 +4,9 @@ local utils = require('figtree.utils')
 M = {}
 
 --- Precomputes window size agnostic stuff for the draw() closure
-function M.mk_draw(state)
+function M.mk_draw(state, config)
   -- prep that is window size agnostic
-  local body = figio.get_banner(state)
+  local body = figio.get_banner(config)
   local ver_string = utils.version_string()
   local lines = vim.split(body, '\n', { trimempty = true })
   local tx = #lines[1] -- assuming all lines have equal width

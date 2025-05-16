@@ -11,7 +11,7 @@ end
 local function unhide_cursor(state) vim.opt.guicursor = state.gcr end
 
 --- startup callback
-local function enter(state)
+local function enter(state, config)
   -- skip greeter when opening files
   if vim.fn.argc() ~= 0 then return end
 
@@ -55,11 +55,11 @@ local function enter(state)
       ]])
 
   -- apply remaps for the greeter buffer
-  state.config.remaps()
+  config.remaps()
 end
 
-function M.enter(state)
-  return function() enter(state) end
+function M.enter(state, config)
+  return function() enter(state, config) end
 end
 
 return M

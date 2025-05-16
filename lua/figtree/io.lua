@@ -5,8 +5,8 @@ local dir = root .. '/banners'
 local textfile = root .. '/text.txt'
 
 ---@return string output, boolean ok
-local function figlet(state)
-  local res = vim.system({ 'figlet', '-w', '999', '-f', state.config.font, state.config.text }, { text = true }):wait()
+local function figlet(config)
+  local res = vim.system({ 'figlet', '-w', '999', '-f', config.font, config.text }, { text = true }):wait()
   if res.code ~= 0 then return string.format('figlet error: %s', res.stderr), false end
   return res.stdout, true
 end
@@ -35,12 +35,12 @@ local function text_changed(text)
 end
 
 ---@return string
-function M.get_banner(state)
+function M.get_banner(config)
   vim.fn.mkdir(dir, 'p')
-  local filename = dir .. string.format('/%s.txt', state.config.font)
-  if text_changed(state.text) then
+  local filename = dir .. string.format('/%s.txt', config.font)
+  if text_changed(config.text) then
     vim.fn.delete(dir, 'rf')
-    save_text(state.text)
+    save_text(config.text)
   end
   local chars
   local file = io.open(filename, 'r')
@@ -49,7 +49,7 @@ function M.get_banner(state)
     file:close()
   else
     local ok
-    chars, ok = figlet(state)
+    chars, ok = figlet(config)
     if ok then
       file = io.open(filename, 'w')
       if file == nil then

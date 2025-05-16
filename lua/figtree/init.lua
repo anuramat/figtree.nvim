@@ -1,5 +1,4 @@
 local M = {}
-local state = {}
 
 local callbacks = require('figtree.callbacks')
 local render = require('figtree.render')
@@ -20,10 +19,11 @@ local defaults = {
 
 ---@param opts opts?
 M.setup = function(opts)
-  state.config = vim.tbl_deep_extend('force', defaults, opts or {})
-  render.mk_draw(state)
+  local state = {}
+  local config = vim.tbl_deep_extend('force', defaults, opts or {})
+  render.mk_draw(state, config)
   vim.api.nvim_create_autocmd('VimEnter', {
-    callback = callbacks.enter(state),
+    callback = callbacks.enter(state, config),
   })
 end
 
