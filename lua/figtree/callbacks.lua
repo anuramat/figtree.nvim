@@ -1,5 +1,6 @@
-M = {}
+local m = {}
 
+---@param state state
 local function hide_cursor(state)
   state.gcr = vim.opt.guicursor
   local hl = vim.api.nvim_get_hl(0, { name = 'Cursor' })
@@ -8,9 +9,12 @@ local function hide_cursor(state)
   vim.opt.guicursor:append('a:HiddenCursor,ci-c-cr:Cursor')
 end
 
+---@param state state
 local function unhide_cursor(state) vim.opt.guicursor = state.gcr end
 
---- startup callback
+--- Startup callback
+---@param state state
+---@param config config
 local function enter(state, config)
   -- skip greeter when opening files
   if vim.fn.argc() ~= 0 then return end
@@ -58,8 +62,11 @@ local function enter(state, config)
   config.remaps()
 end
 
-function M.enter(state, config)
+---@param state state
+---@param config config
+---@return function
+function m.enter(state, config)
   return function() enter(state, config) end
 end
 
-return M
+return m

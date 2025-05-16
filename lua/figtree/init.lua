@@ -1,13 +1,17 @@
-local M = {}
+local m = {}
 
 local callbacks = require('figtree.callbacks')
 local render = require('figtree.render')
 local utils = require('figtree.utils')
 
----@type opts
+---@type config
 local defaults = {
   text = 'neovim',
   font = 'fraktur',
+  show_version = {
+    enabled = true,
+    spacing = 3,
+  },
   remaps = function()
     local allowed_keys = vim.split(':`', '')
     utils.unmap(allowed_keys)
@@ -17,8 +21,8 @@ local defaults = {
   end,
 }
 
----@param opts opts?
-M.setup = function(opts)
+---@param opts config?
+m.setup = function(opts)
   local state = {}
   local config = vim.tbl_deep_extend('force', defaults, opts or {})
   render.mk_draw(state, config)
@@ -27,4 +31,4 @@ M.setup = function(opts)
   })
 end
 
-return M
+return m

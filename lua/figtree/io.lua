@@ -1,5 +1,6 @@
-M = {}
+local m = {}
 
+local utils = require('figtree.utils')
 local root = vim.fn.stdpath('cache') .. '/figtree.nvim'
 local dir = root .. '/banners'
 local textfile = root .. '/text.txt'
@@ -11,7 +12,8 @@ local function figlet(config)
   return res.stdout, true
 end
 
-local function write_error(filename) M.err(string.format('couldn\'t open %s for writing', filename)) end
+---@param filename string
+local function write_error(filename) utils.error(string.format('couldn\'t open %s for writing', filename)) end
 
 local function save_text(text)
   local file = io.open(textfile, 'w')
@@ -23,10 +25,13 @@ local function save_text(text)
   end
 end
 
-local function text_changed(text)
+--- Checks if cache
+---@param text string
+---@return boolean
+local function is_valid(text)
   local file = io.open(textfile, 'w')
   if file == nil then
-    return true
+    return false
   else
     local contents = file:read('*a')
     file:close()
@@ -34,20 +39,26 @@ local function text_changed(text)
   end
 end
 
----@return string
-function M.get_banner(config)
-  vim.fn.mkdir(dir, 'p')
+--- Read-through cache wrapper for figlet
+---@return string[]
+function m.get_banner(config)
+  -- file with the cached banner
   local filename = dir .. string.format('/%s.txt', config.font)
-  if text_changed(config.text) then
-    vim.fn.delete(dir, 'rf')
-    save_text(config.text)
-  end
+
+  local wipe = not is_valid(config.text)
+  if wipe then vim.fn.delete(dir, 'rf') end
+  vim.fn.mkdir(dir, 'p')
+  if wipe then save_text(config.text) end
+
+  -- read || generate && write
   local chars
   local file = io.open(filename, 'r')
   if file ~= nil then
+    -- hit
     chars = file:read('*a')
     file:close()
   else
+    -- miss
     local ok
     chars, ok = figlet(config)
     if ok then
@@ -60,7 +71,7 @@ function M.get_banner(config)
       end
     end
   end
-  return chars
+  return vim.split(chars, '\n', { trimempty = true })
 end
 
-return M
+return m
