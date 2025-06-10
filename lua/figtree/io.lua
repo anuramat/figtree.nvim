@@ -29,7 +29,7 @@ end
 ---@param text string
 ---@return boolean
 local function is_valid(text)
-  local file = io.open(textfile, 'w')
+  local file = io.open(textfile, 'r')
   if file == nil then
     return false
   else
