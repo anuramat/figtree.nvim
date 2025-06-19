@@ -51,8 +51,11 @@ local function enter(state, config)
 
   -- make the buffer special
   -- luacheck: ignore 613 -- trailing whitespace
+  -- XXX should rather be wipe, but that breaks image-nvim:
+  -- their WinNew autocommand references the buffer which doesn't exist
+  -- idk why 'delete' is fine tho
   vim.cmd([[
-      setl bh=wipe bt=nofile scl=no siso=0
+      setl bh=delete bt=nofile scl=no siso=0
       setl fcs+=eob:\ 
       setl nocul nolist noma nonu nornu noswf ro
       setl stl=\ 
