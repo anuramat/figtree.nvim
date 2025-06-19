@@ -28,10 +28,12 @@ local function enter(state, config)
   vim.api.nvim_create_autocmd('WinNew', {
     buffer = 1,
     callback = function(ev)
+      -- TODO do not close the greeter on fzf-lua and so on, waiting for <https://github.com/neovim/neovim/issues/25844>
       unhide_cursor(state)
       local buf = vim.api.nvim_create_buf(true, false)
-      vim.api.nvim_win_set_buf(old, buf)
-      if ev.buf == 1 then vim.api.nvim_win_set_buf(0, buf) end
+      vim.api.nvim_win_set_buf(old, buf) -- new buffer in the original window
+      -- HACK idk how this works but it does
+      vim.api.nvim_win_set_buf(0, buf) -- new buffer in the new window eg on :vs
     end,
     once = true,
   })
