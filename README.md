@@ -28,3 +28,11 @@ local x = {
   },
 }
 ```
+
+## Nix demo
+
+This repository ships a small Neovim configuration via flakes. Try the plugin with:
+
+```bash
+nix run .#nvim
+```
