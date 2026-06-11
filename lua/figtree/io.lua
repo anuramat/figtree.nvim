@@ -7,7 +7,9 @@ local textfile = root .. '/text.txt'
 
 ---@return string output, boolean ok
 local function figlet(config)
-  local res = vim.system({ 'figlet', '-w', '999', '-f', config.font, config.text }, { text = true }):wait()
+  local ok, res = pcall(vim.system, { 'figlet', '-w', '999', '-f', config.font, config.text }, { text = true })
+  if not ok then return string.format('figlet error: %s', res), false end
+  res = res:wait()
   if res.code ~= 0 then return string.format('figlet error: %s', res.stderr), false end
   return res.stdout, true
 end
