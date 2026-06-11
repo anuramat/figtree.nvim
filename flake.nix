@@ -13,7 +13,10 @@
           pname = "figtree.nvim";
           version = "unstable";
           src = ./.;
-          buildInputs = [ pkgs.figlet ];
+          postPatch = ''
+            substituteInPlace lua/figtree/io.lua \
+              --replace-fail "'figlet'," "'${pkgs.figlet}/bin/figlet',"
+          '';
           meta = {
             description = "figlet startup banner for neovim";
             homepage = "https://github.com/anuramat/figtree.nvim";
