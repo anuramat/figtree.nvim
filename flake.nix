@@ -1,62 +1,60 @@
 {
   outputs =
-    {
-      nixpkgs,
-      flake-utils,
-      ...
-    }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-        figtree = pkgs.vimUtils.buildVimPlugin {
-          pname = "figtree.nvim";
-          version = "unstable";
-          src = ./.;
-          postPatch = ''
-            substituteInPlace lua/figtree/io.lua \
-              --replace-fail "'figlet'," "'${pkgs.figlet}/bin/figlet',"
-          '';
-          meta = {
-            description = "figlet startup banner for neovim";
-            homepage = "https://github.com/anuramat/figtree.nvim";
-          };
-        };
-        neovim =
-          let
-            pkg = pkgs.wrapNeovim pkgs.neovim-unwrapped {
-              configure = {
-                # https://nixos.wiki/wiki/Vim#Custom_setup_without_using_Home_Manager
-                packages.myPlugins = {
-                  start = [
-                    figtree
-                  ];
-                };
-                customRC = ''
-                  lua require("figtree").setup()
-                '';
-              };
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
+      imports = [ inputs.treefmt-nix.flakeModule ];
+      perSystem =
+        { pkgs, config, ... }:
+        {
+          packages.default = pkgs.vimUtils.buildVimPlugin {
+            pname = "figtree.nvim";
+            version = "unstable";
+            src = ./.;
+            postPatch = ''
+              substituteInPlace lua/figtree/io.lua \
+                --replace-fail "'figlet'," "'${pkgs.figlet}/bin/figlet',"
+            '';
+            meta = {
+              description = "figlet startup banner for neovim";
+              homepage = "https://github.com/anuramat/figtree.nvim";
             };
-          in
-          {
-            type = "app";
-            program = "${pkg}/bin/nvim";
           };
-      in
-      {
-        packages = {
-          inherit figtree;
-          default = figtree;
+
+          apps.default.program =
+            let
+              pkg = pkgs.wrapNeovim pkgs.neovim-unwrapped {
+                configure = {
+                  packages.figtree.start = [ config.packages.default ];
+                  customRC = ''
+                    lua require("figtree").setup()
+                  '';
+                };
+              };
+            in
+            "${pkg}/bin/nvim";
+
+          treefmt.programs = {
+            stylua.enable = true;
+            nixfmt.enable = true;
+          };
         };
-        apps = {
-          inherit neovim;
-          default = neovim;
-        };
-      }
-    );
+    };
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 }
