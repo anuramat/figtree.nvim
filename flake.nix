@@ -1,6 +1,23 @@
 {
   outputs =
     inputs:
+    let
+      mkFigtree =
+        pkgs:
+        pkgs.vimUtils.buildVimPlugin {
+          pname = "figtree.nvim";
+          version = "unstable";
+          src = ./.;
+          postPatch = ''
+            substituteInPlace lua/figtree/io.lua \
+              --replace-fail "'figlet'," "'${pkgs.figlet}/bin/figlet',"
+          '';
+          meta = {
+            description = "figlet startup banner for neovim";
+            homepage = "https://github.com/anuramat/figtree.nvim";
+          };
+        };
+    in
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
@@ -9,21 +26,19 @@
         "aarch64-darwin"
       ];
       imports = [ inputs.treefmt-nix.flakeModule ];
+
+      flake.overlays.default = final: prev: {
+        vimPlugins = prev.vimPlugins // {
+          figtree-nvim = mkFigtree final;
+        };
+      };
+
       perSystem =
         { pkgs, config, ... }:
         {
-          packages.default = pkgs.vimUtils.buildVimPlugin {
-            pname = "figtree.nvim";
-            version = "unstable";
-            src = ./.;
-            postPatch = ''
-              substituteInPlace lua/figtree/io.lua \
-                --replace-fail "'figlet'," "'${pkgs.figlet}/bin/figlet',"
-            '';
-            meta = {
-              description = "figlet startup banner for neovim";
-              homepage = "https://github.com/anuramat/figtree.nvim";
-            };
+          packages = {
+            figtree-nvim = mkFigtree pkgs;
+            default = config.packages.figtree-nvim;
           };
 
           apps.default.program =
